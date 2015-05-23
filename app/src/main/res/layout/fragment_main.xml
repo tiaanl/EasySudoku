@@ -13,10 +13,81 @@
     <com.fizix.android.easysudoku.BoardView
         android:id="@+id/board"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        app:exampleColor="#33b5e5"
-        app:exampleDimension="24sp"
-        app:exampleDrawable="@android:drawable/ic_menu_add"
-        app:exampleString="Hello, BoardView" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button1"
+                style="@style/NumberButton"
+                android:text="1" />
+
+            <Button
+                android:id="@+id/button2"
+                style="@style/NumberButton"
+                android:text="2" />
+
+            <Button
+                android:id="@+id/button3"
+                style="@style/NumberButton"
+                android:text="3" />
+
+            <Button
+                android:id="@+id/button4"
+                style="@style/NumberButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button5"
+                style="@style/NumberButton"
+                android:text="5" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button6"
+                style="@style/NumberButton"
+                android:text="6" />
+
+            <Button
+                android:id="@+id/button7"
+                style="@style/NumberButton"
+                android:text="7" />
+
+            <Button
+                android:id="@+id/button8"
+                style="@style/NumberButton"
+                android:text="8" />
+
+            <Button
+                android:id="@+id/button9"
+                style="@style/NumberButton"
+                android:text="9" />
+
+            <Button
+                android:id="@+id/button0"
+                style="@style/NumberButton"
+                android:text="Clear" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>
