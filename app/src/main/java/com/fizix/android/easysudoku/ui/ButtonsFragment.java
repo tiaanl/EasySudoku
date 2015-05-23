@@ -15,10 +15,13 @@ public class ButtonsFragment extends Fragment implements Board.Listener, NumberB
 
     private static final String LOG_TAG = ButtonsFragment.class.getSimpleName();
 
-    Board mBoard;
+    private Board mBoard;
 
     // All the buttons.
-    NumberButtonView mButtons[] = new NumberButtonView[10];
+    private NumberButtonView mButtons[] = new NumberButtonView[10];
+
+    // The selected number.
+    private int mSelectedNumber = -1;
 
     public ButtonsFragment() {
     }
@@ -60,16 +63,33 @@ public class ButtonsFragment extends Fragment implements Board.Listener, NumberB
     }
 
     @Override
-    public void onBoardChanged() {
+    public void onActionNumberChanged(int actionNumber) {
+        onNumberButtonSelected(actionNumber);
+    }
+
+    @Override
+    public void onSelectedBlockChanged(int x, int y, int number) {
+    }
+
+    @Override
+    public void onNumbersChanged(int x, int y, int number) {
     }
 
     @Override
     public void onNumberButtonSelected(int number) {
         Log.d(LOG_TAG, String.format("Button %d pressed.", number));
 
+        if (mSelectedNumber == number) {
+            return;
+        }
+
+        mSelectedNumber = number;
+
         for (int i = 0; i < 10; ++i) {
             mButtons[i].setSelected(false);
         }
         mButtons[number].setSelected(true);
+
+        mBoard.setActionNumber(number);
     }
 }

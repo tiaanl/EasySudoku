@@ -3,6 +3,7 @@ package com.fizix.android.easysudoku;
 import android.util.Log;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Board {
@@ -16,8 +17,13 @@ public class Board {
     private int mSelectedBlockX;
     private int mSelectedBlockY;
 
+    // The currently selected number.
+    private int mActionNumber;
+
     public interface Listener {
-        void onBoardChanged();
+        void onSelectedBlockChanged(int x, int y, int number);
+        void onActionNumberChanged(int actionNumber);
+        void onNumbersChanged(int x, int y, int number);
     }
 
     Set<Listener> mListeners = new HashSet<>();
@@ -33,20 +39,31 @@ public class Board {
 
         mSelectedBlockX = 1;
         mSelectedBlockY = 1;
+
+        mActionNumber = 1;
     }
 
     public int getNumberAt(int x, int y) {
-        int index = (y - 1) * 9 + (x - 1);
+        final int index = (y - 1) * 9 + (x - 1);
         assert (index >= 0 && index < 81);
         return mNumbers[index];
+    }
+
+    public void setNumberAt(int x, int y, int number) {
+        final int index = (y - 1) * 9 + (x - 1);
+        assert (index >= 0 && index < 81);
+        mNumbers[index] = number;
+
+        for (Listener listener : mListeners) {
+            listener.onNumbersChanged(x, y, number);
+        }
     }
 
     public int getSelectedBlockX() {
         return mSelectedBlockX;
     }
 
-    public int getSelectedBlockY()
-    {
+    public int getSelectedBlockY() {
         return mSelectedBlockY;
     }
 
@@ -60,7 +77,22 @@ public class Board {
         mSelectedBlockX = x;
         mSelectedBlockY = y;
 
-        boardChanged();
+        // When the selected block changed and it is filled in, then make it the selected number,
+        // otherwise fill in the number.
+        int selectedNumber = getNumberAt(mSelectedBlockX, mSelectedBlockY);
+        if (selectedNumber != 0) {
+            if (mActionNumber == 0) {
+                setNumberAt(mSelectedBlockX, mSelectedBlockY, 0);
+            } else {
+                setActionNumber(selectedNumber);
+            }
+        } else {
+            setNumberAt(mSelectedBlockX, mSelectedBlockY, mActionNumber);
+        }
+
+        for (Listener listener : mListeners) {
+            listener.onSelectedBlockChanged(mSelectedBlockX, mSelectedBlockY, getNumberAt(mSelectedBlockX, mSelectedBlockY));
+        }
     }
 
     public void addListener(Listener listener) {
@@ -71,10 +103,16 @@ public class Board {
         mListeners.remove(listener);
     }
 
-    public void boardChanged() {
+    public void setActionNumber(int actionNumber) {
+        mActionNumber = actionNumber;
+
         for (Listener listener : mListeners) {
-            listener.onBoardChanged();
+            listener.onActionNumberChanged(actionNumber);
         }
+    }
+
+    public int getActionNumber() {
+        return mActionNumber;
     }
 
 }

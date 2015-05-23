@@ -46,6 +46,7 @@ public class BoardView extends View implements Board.Listener {
 
     // The paint used for the numbers on the board.
     private TextPaint mTextPaint;
+    private TextPaint mSelectedTextPaint;
 
     // Temporary Rect used in painting.
     private Rect mBoundsRect;
@@ -85,7 +86,17 @@ public class BoardView extends View implements Board.Listener {
     }
 
     @Override
-    public void onBoardChanged() {
+    public void onSelectedBlockChanged(int x, int y, int number) {
+        invalidate();
+    }
+
+    @Override
+    public void onActionNumberChanged(int actionNumber) {
+        invalidate();
+    }
+
+    @Override
+    public void onNumbersChanged(int x, int y, int number) {
         invalidate();
     }
 
@@ -122,6 +133,10 @@ public class BoardView extends View implements Board.Listener {
         mTextPaint.setColor(Color.BLACK);
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
+        mSelectedTextPaint = new TextPaint();
+        mSelectedTextPaint.setColor(Color.RED);
+        mSelectedTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+
         a.recycle();
     }
 
@@ -138,7 +153,9 @@ public class BoardView extends View implements Board.Listener {
             mBlockWidth = mBlockHeight;
         }
 
-        mTextPaint.setTextSize((float) mBlockWidth / (9.0f + 5.0f));
+        float textSize = (float) mBlockWidth / (9.0f + 5.0f);
+        mTextPaint.setTextSize(textSize);
+        mSelectedTextPaint.setTextSize(textSize);
     }
 
     @Override
@@ -214,21 +231,18 @@ public class BoardView extends View implements Board.Listener {
             canvas.drawRect(right - mSelectedLineWidth, top + mSelectedLineWidth, right, bottom, mSelectedLinePaint);
         }
 
-        Log.d(LOG_TAG, "testing");
-
         // Draw the numbers.
         if (mBoard != null) {
+            int selectedNumber = mBoard.getActionNumber();
             for (int y = 0; y < 9; ++y) {
                 for (int x = 0; x < 9; ++x) {
                     int number = mBoard.getNumberAt(x + 1, y + 1);
                     if (number == 0)
                         continue;
 
-                    Log.d(LOG_TAG, "number: %d");
-
                     String str = String.format("%d", number);
-
-                    mTextPaint.getTextBounds(str, 0, 1, mBoundsRect);
+                    TextPaint textPaint = (selectedNumber == number) ? mSelectedTextPaint : mTextPaint;
+                    textPaint.getTextBounds(str, 0, 1, mBoundsRect);
 
                     float left = (float) x * ((float) mBlockWidth - mLineWidth) / 9.0f + mLineWidth;
                     float top = (float) y * ((float) mBlockHeight - mLineWidth) / 9.0f + mLineWidth;
@@ -238,7 +252,7 @@ public class BoardView extends View implements Board.Listener {
                             str,
                             left + (right - left) / 2.0f - (float) (mBoundsRect.centerX()),
                             top + (bottom - top) / 2.0f - (float) (mBoundsRect.centerY()),
-                            mTextPaint
+                            textPaint
                     );
                 }
             }
