@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="NumberButtonView">
+        <attr name="number" format="integer" />
+    </declare-styleable>
+</resources>

@@ -92,8 +92,6 @@ public class BoardView extends View implements Board.Listener {
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.BoardView, defStyle, 0);
 
-        Log.d(LOG_TAG, String.format("width: %d, %d", getWidth(), getHeight()));
-
         // Calculate line widths.
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
 
@@ -212,6 +210,8 @@ public class BoardView extends View implements Board.Listener {
             canvas.drawRect(right - mSelectedLineWidth, top + mSelectedLineWidth, right, bottom, mSelectedLinePaint);
         }
 
+        Log.d(LOG_TAG, "testing");
+
         // Draw the numbers.
         if (mBoard != null) {
             for (int y = 0; y < 9; ++y) {
@@ -219,6 +219,8 @@ public class BoardView extends View implements Board.Listener {
                     int number = mBoard.getNumberAt(x + 1, y + 1);
                     if (number == 0)
                         continue;
+
+                    Log.d(LOG_TAG, "number: %d");
 
                     String str = String.format("%d", number);
 
@@ -243,8 +245,8 @@ public class BoardView extends View implements Board.Listener {
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getX() < mBlockWidth && event.getY() < mBlockHeight && mBoard != null) {
             mBoard.setSelectedBlock(
-                    (int) Math.floor((event.getX() / (float) mBlockWidth * 9.0f)) + 1,
-                    (int) Math.floor((event.getY() / (float) mBlockHeight * 9.0f)) + 1
+                    (int) Math.round(Math.floor((event.getX() / (float) mBlockWidth * 9.0f)) + 1.0f),
+                    (int) Math.round(Math.floor((event.getY() / (float) mBlockHeight * 9.0f)) + 1.0f)
             );
         }
 
