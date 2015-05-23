@@ -11,6 +11,7 @@
     tools:context=".MainActivityFragment">
 
     <com.fizix.android.easysudoku.BoardView
+        android:id="@+id/board"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         app:exampleColor="#33b5e5"

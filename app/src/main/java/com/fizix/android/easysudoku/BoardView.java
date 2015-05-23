@@ -5,20 +5,29 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
-public class BoardView extends View {
+public class BoardView extends View implements Board.Listener {
 
     private static final String LOG_TAG = BoardView.class.getSimpleName();
+
+    // The board we are painting.
+    private Board mBoard = null;
 
     private int mBlockWidth;
     private int mBlockHeight;
 
     // The width of the separator lines.
     private float mLineWidth;
+
+    // The width of the line we use to draw the selected block.
+    private float mSelectedLineWidth;
 
     // The dark and light background paints.
     private Paint mDarkBackgroundPaint;
@@ -28,7 +37,14 @@ public class BoardView extends View {
     private Paint mBackgroundPaint;
 
     // The paint we use to draw the separator lines on the board.
-    private Paint mSeparatorLinePaint;
+    private Paint mLinePaint;
+    private Paint mSelectedLinePaint;
+
+    // The paint used for the numbers on the board.
+    private TextPaint mTextPaint;
+
+    // Temporary Rect used in painting.
+    private Rect mBoundsRect;
 
     public BoardView(Context context) {
         super(context);
@@ -45,71 +61,66 @@ public class BoardView extends View {
         init(attrs, defStyle);
     }
 
+    public void setBoard(Board board) {
+        // If we were a listener, remove ourselves.
+        if (mBoard != null) {
+            mBoard.removeListener(this);
+        }
+
+        // Set the new board.
+        mBoard = board;
+
+        // Set ourselves as a listener.
+        if (mBoard != null) {
+            mBoard.addListener(this);
+        }
+    }
+
+    public Board getBoard() {
+        return mBoard;
+    }
+
+    @Override
+    public void onBoardChanged() {
+        invalidate();
+    }
+
     private void init(AttributeSet attrs, int defStyle) {
+        mBoundsRect = new Rect();
+
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.BoardView, defStyle, 0);
 
         Log.d(LOG_TAG, String.format("width: %d, %d", getWidth(), getHeight()));
 
-        // Calculate the line width.
+        // Calculate line widths.
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+
         mLineWidth = Math.round(displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT);
+        mSelectedLineWidth = Math.round(displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT * 3.0f);
 
         // Create the paint we'll use.
 
         mDarkBackgroundPaint = new Paint();
-        mDarkBackgroundPaint.setColor(Color.rgb(191, 191, 191));
+        mDarkBackgroundPaint.setColor(Color.rgb(223, 223, 223));
         mLightBackgroundPaint = new Paint();
         mLightBackgroundPaint.setColor(Color.rgb(255, 255, 255));
 
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setColor(Color.RED);
 
-        mSeparatorLinePaint = new Paint();
-        mSeparatorLinePaint.setColor(Color.BLACK);
+        mLinePaint = new Paint();
+        mLinePaint.setColor(Color.BLACK);
 
-        /*
-        mExampleString = a.getString(
-                R.styleable.BoardView_exampleString);
-        mExampleColor = a.getColor(
-                R.styleable.BoardView_exampleColor,
-                mExampleColor);
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-        mExampleDimension = a.getDimension(
-                R.styleable.BoardView_exampleDimension,
-                mExampleDimension);
+        mSelectedLinePaint = new Paint();
+        mSelectedLinePaint.setColor(Color.RED);
 
-        if (a.hasValue(R.styleable.BoardView_exampleDrawable)) {
-            mExampleDrawable = a.getDrawable(
-                    R.styleable.BoardView_exampleDrawable);
-            mExampleDrawable.setCallback(this);
-        }
-        */
+        mTextPaint = new TextPaint();
+        mTextPaint.setColor(Color.BLACK);
+        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
         a.recycle();
-
-        // Set up a default TextPaint object
-        /*
-        mTextPaint = new TextPaint();
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextAlign(Paint.Align.LEFT);
-        */
-
-        // Update TextPaint and text measurements from attributes
-        invalidateTextPaintAndMeasurements();
-    }
-
-    private void invalidateTextPaintAndMeasurements() {
-        /*
-        mTextPaint.setTextSize(mExampleDimension);
-        mTextPaint.setColor(mExampleColor);
-        mTextWidth = mTextPaint.measureText(mExampleString);
-
-        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-        mTextHeight = fontMetrics.bottom;
-        */
     }
 
     @Override
@@ -124,11 +135,15 @@ public class BoardView extends View {
         } else {
             mBlockWidth = mBlockHeight;
         }
+
+        mTextPaint.setTextSize((float) mBlockWidth / (9.0f + 5.0f));
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        Log.d(LOG_TAG, "onDraw");
 
         Log.d(LOG_TAG, String.format("onDraw: %d -- %d", getWidth(), getHeight()));
 
@@ -163,7 +178,7 @@ public class BoardView extends View {
                     0.0f,
                     currentX + mLineWidth,
                     mBlockHeight,
-                    mSeparatorLinePaint
+                    mLinePaint
             );
             currentX += mLineWidth + openSpace;
         }
@@ -176,34 +191,63 @@ public class BoardView extends View {
                     currentY,
                     mBlockWidth,
                     currentY + mLineWidth,
-                    mSeparatorLinePaint
+                    mLinePaint
             );
             currentY += mLineWidth + openSpace;
         }
 
-        // TODO: consider storing these as member variables to reduce
-        // allocations per draw cycle.
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
+        // Draw the selected block.
+        if (mBoard != null && mBoard.hasSelectedBlock()) {
+            int selectedBlockX = mBoard.getSelectedBlockX() - 1;
+            int selectedBlockY = mBoard.getSelectedBlockY() - 1;
 
-        int contentWidth = getWidth() - paddingLeft - paddingRight;
-        int contentHeight = getHeight() - paddingTop - paddingBottom;
+            float left = (float) selectedBlockX * ((float) mBlockWidth - mLineWidth) / 9.0f;
+            float top = (float) selectedBlockY * ((float) mBlockHeight - mLineWidth) / 9.0f;
+            float right = (float) (selectedBlockX + 1) * ((float) mBlockWidth - mLineWidth) / 9.0f + mLineWidth;
+            float bottom = (float) (selectedBlockY + 1) * ((float) mBlockHeight - mLineWidth) / 9.0f + mLineWidth;
 
-        /*
-        // Draw the text.
-        canvas.drawText(mExampleString,
-                paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2,
-                mTextPaint);
-
-        // Draw the example drawable on top of the text.
-        if (mExampleDrawable != null) {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight);
-            mExampleDrawable.draw(canvas);
+            canvas.drawRect(left, top, right, top + mSelectedLineWidth, mSelectedLinePaint);
+            canvas.drawRect(left, bottom - mSelectedLineWidth, right, bottom, mSelectedLinePaint);
+            canvas.drawRect(left, top + mSelectedLineWidth, left + mSelectedLineWidth, bottom - mSelectedLineWidth, mSelectedLinePaint);
+            canvas.drawRect(right - mSelectedLineWidth, top + mSelectedLineWidth, right, bottom, mSelectedLinePaint);
         }
-        */
+
+        // Draw the numbers.
+        if (mBoard != null) {
+            for (int y = 0; y < 9; ++y) {
+                for (int x = 0; x < 9; ++x) {
+                    int number = mBoard.getNumberAt(x + 1, y + 1);
+                    if (number == 0)
+                        continue;
+
+                    String str = String.format("%d", number);
+
+                    mTextPaint.getTextBounds(str, 0, 1, mBoundsRect);
+
+                    float left = (float) x * ((float) mBlockWidth - mLineWidth) / 9.0f + mLineWidth;
+                    float top = (float) y * ((float) mBlockHeight - mLineWidth) / 9.0f + mLineWidth;
+                    float right = (float) (x + 1) * ((float) mBlockWidth - mLineWidth) / 9.0f;
+                    float bottom = (float) (y + 1) * ((float) mBlockHeight - mLineWidth) / 9.0f;
+                    canvas.drawText(
+                            str,
+                            left + (right - left) / 2.0f - (float) (mBoundsRect.centerX()),
+                            top + (bottom - top) / 2.0f - (float) (mBoundsRect.centerY()),
+                            mTextPaint
+                    );
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getX() < mBlockWidth && event.getY() < mBlockHeight && mBoard != null) {
+            mBoard.setSelectedBlock(
+                    (int) Math.floor((event.getX() / (float) mBlockWidth * 9.0f)) + 1,
+                    (int) Math.floor((event.getY() / (float) mBlockHeight * 9.0f)) + 1
+            );
+        }
+
+        return super.onTouchEvent(event);
     }
 }
