@@ -1,4 +1,4 @@
-package com.fizix.android.easysudoku;
+package com.fizix.android.easysudoku.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -12,6 +12,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.fizix.android.easysudoku.Board;
+import com.fizix.android.easysudoku.R;
+
 
 public class BoardView extends View implements Board.Listener {
 

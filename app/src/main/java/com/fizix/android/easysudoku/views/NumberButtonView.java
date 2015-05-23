@@ -1,4 +1,4 @@
-package com.fizix.android.easysudoku;
+package com.fizix.android.easysudoku.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,9 +11,10 @@ import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.fizix.android.easysudoku.R;
 
 public class NumberButtonView extends View {
     private static final String LOG_TAG = NumberButtonView.class.getSimpleName();
@@ -38,7 +39,7 @@ public class NumberButtonView extends View {
     // The rect we use to draw the outline of the button.
     private RectF mOutlineRect;
 
-    interface SelectListener {
+    public interface SelectListener {
         void onNumberButtonSelected(int number);
     }
 
@@ -142,7 +143,7 @@ public class NumberButtonView extends View {
         return super.onTouchEvent(event);
     }
 
-    void setSelectListener(SelectListener selectListener) {
+    public void setSelectListener(SelectListener selectListener) {
         mSelectListener = selectListener;
     }
 

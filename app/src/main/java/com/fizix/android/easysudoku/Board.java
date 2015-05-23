@@ -16,13 +16,13 @@ public class Board {
     private int mSelectedBlockX;
     private int mSelectedBlockY;
 
-    interface Listener {
+    public interface Listener {
         void onBoardChanged();
     }
 
     Set<Listener> mListeners = new HashSet<>();
 
-    Board() {
+    public Board() {
         mNumbers = new int[9 * 9];
 
         for (int i = 0; i < mNumbers.length; ++i) {
@@ -35,21 +35,22 @@ public class Board {
         mSelectedBlockY = 1;
     }
 
-    int getNumberAt(int x, int y) {
+    public int getNumberAt(int x, int y) {
         int index = (y - 1) * 9 + (x - 1);
         assert (index >= 0 && index < 81);
         return mNumbers[index];
     }
 
-    int getSelectedBlockX() {
+    public int getSelectedBlockX() {
         return mSelectedBlockX;
     }
 
-    int getSelectedBlockY() {
+    public int getSelectedBlockY()
+    {
         return mSelectedBlockY;
     }
 
-    boolean hasSelectedBlock() {
+    public boolean hasSelectedBlock() {
         return (mSelectedBlockX >= 1 && mSelectedBlockX <= 9) && (mSelectedBlockY >= 1 && mSelectedBlockY <= 9);
     }
 

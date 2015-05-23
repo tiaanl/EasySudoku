@@ -1,17 +1,32 @@
-package com.fizix.android.easysudoku;
+package com.fizix.android.easysudoku.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.fizix.android.easysudoku.Board;
+import com.fizix.android.easysudoku.R;
+import com.fizix.android.easysudoku.views.BoardView;
+
 
 public class MainActivity extends AppCompatActivity {
+
+    Board mBoard;
+    ButtonsFragment mButtonsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mBoard = new Board();
+
+        BoardView boardView = (BoardView) findViewById(R.id.board);
+        boardView.setBoard(mBoard);
+
+        mButtonsFragment = (ButtonsFragment) getSupportFragmentManager().findFragmentById(R.id.buttonsFragment);
+        mButtonsFragment.setBoard(mBoard);
     }
 
     @Override
@@ -35,4 +50,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
