@@ -7,6 +7,7 @@ import android.view.MenuItem;
 
 import com.fizix.android.easysudoku.Board;
 import com.fizix.android.easysudoku.R;
+import com.fizix.android.easysudoku.data.DbHelper;
 import com.fizix.android.easysudoku.views.BoardView;
 
 
@@ -16,19 +17,37 @@ public class MainActivity extends AppCompatActivity {
 
     private Board mBoard;
     private ButtonsFragment mButtonsFragment;
+    private DbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBoard = new Board();
+        // Make sure we can access the database.
+        mDbHelper = new DbHelper(this);
+        mBoard = new Board(0);
+        mBoard.loadFromDb(mDbHelper);
 
         BoardView boardView = (BoardView) findViewById(R.id.board);
         boardView.setBoard(mBoard);
 
         mButtonsFragment = (ButtonsFragment) getSupportFragmentManager().findFragmentById(R.id.buttonsFragment);
         mButtonsFragment.setBoard(mBoard);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mBoard.saveToDb(mDbHelper);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mBoard.loadFromDb(mDbHelper);
     }
 
     @Override

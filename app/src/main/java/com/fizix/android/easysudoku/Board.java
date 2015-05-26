@@ -1,14 +1,24 @@
 package com.fizix.android.easysudoku;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.fizix.android.easysudoku.data.Contract.Boards;
+import com.fizix.android.easysudoku.data.Contract.Blocks;
+import com.fizix.android.easysudoku.data.DbHelper;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
 
 public class Board {
 
     private static final String LOG_TAG = Board.class.getSimpleName();
+
+    // The type of block.
+    private int mBoardType;
 
     // The numbers on the board.
     private Block mBlocks[];
@@ -28,7 +38,9 @@ public class Board {
 
     Set<Listener> mListeners = new HashSet<>();
 
-    public Board() {
+    public Board(int boardType) {
+        mBoardType = boardType;
+
         mBlocks = new Block[9 * 9];
 
         for (int i = 0; i < mBlocks.length; ++i) {
@@ -113,6 +125,76 @@ public class Board {
 
     public int getActionNumber() {
         return mActionNumber;
+    }
+
+    public void saveToDb(DbHelper dbHelper) {
+        Log.d(LOG_TAG, "Saving board to database.");
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // Get the board record for this board.
+        ContentValues boardValues = new ContentValues();
+        boardValues.put(Boards.COL_BOARD_TYPE, mBoardType);
+        boardValues.put(Boards.COL_SEL_BLOCK_X, mSelectedBlockX);
+        boardValues.put(Boards.COL_SEL_BLOCK_Y, mSelectedBlockY);
+
+        long boardId = db.insert(Boards.TABLE_NAME, null, boardValues);
+        if (boardId == -1) {
+            return;
+        }
+
+        ContentValues BlockValues = new ContentValues();
+        BlockValues.put(Blocks.COL_BOARD_ID, boardId);
+
+        try {
+            db.beginTransaction();
+
+            boolean hasErrors = false;
+            for (int i = 0; i < mBlocks.length; i++) {
+                final int number = mBlocks[i].getNumber();
+                if (number == 0)
+                    continue;
+
+                BlockValues.put(Blocks.COL_INDEX, i);
+                BlockValues.put(Blocks.COL_NUMBER, number);
+                if (db.insert(Blocks.TABLE_NAME, null, BlockValues) == -1) {
+                    hasErrors = true;
+                    Log.e(LOG_TAG, "Could not insert block row.");
+                    break;
+                }
+            }
+
+            if (!hasErrors) {
+                db.setTransactionSuccessful();
+            }
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void loadFromDb(DbHelper dbHelper) {
+        Log.d(LOG_TAG, "Loading board from database.");
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        final String[] columns = {Blocks.COL_INDEX, Blocks.COL_NUMBER};
+        //final String selection = Blocks.COL_BOARD_TYPE + "=" + mBoardType;
+        final String selection = null;
+
+        Cursor cursor = db.query(Blocks.TABLE_NAME, columns, selection, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Log.d(LOG_TAG, String.format("block: %d, %d", cursor.getInt(0), cursor.getInt(1)));
+
+                int index = cursor.getInt(0);
+                mBlocks[index].setNumber(cursor.getInt(1));
+            } while(cursor.moveToNext());
+        }
+
+        for (Listener listener : mListeners) {
+            listener.onNumbersChanged(0, 0, 0);
+        }
     }
 
 }
