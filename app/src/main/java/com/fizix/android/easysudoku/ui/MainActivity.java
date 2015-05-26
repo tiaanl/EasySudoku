@@ -12,8 +12,10 @@ import com.fizix.android.easysudoku.views.BoardView;
 
 public class MainActivity extends AppCompatActivity {
 
-    Board mBoard;
-    ButtonsFragment mButtonsFragment;
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    private Board mBoard;
+    private ButtonsFragment mButtonsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

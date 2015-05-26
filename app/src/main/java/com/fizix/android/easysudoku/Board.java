@@ -11,7 +11,7 @@ public class Board {
     private static final String LOG_TAG = Board.class.getSimpleName();
 
     // The numbers on the board.
-    private int mNumbers[];
+    private Block mBlocks[];
 
     // Selected block position.
     private int mSelectedBlockX;
@@ -29,13 +29,13 @@ public class Board {
     Set<Listener> mListeners = new HashSet<>();
 
     public Board() {
-        mNumbers = new int[9 * 9];
+        mBlocks = new Block[9 * 9];
 
-        for (int i = 0; i < mNumbers.length; ++i) {
-            mNumbers[i] = 0;
+        for (int i = 0; i < mBlocks.length; ++i) {
+            mBlocks[i] = new Block(i % 9, i / 9, 0);
         }
 
-        mNumbers[4] = 8;
+        setNumberAt(7, 4, 8);
 
         mSelectedBlockX = 1;
         mSelectedBlockY = 1;
@@ -46,13 +46,13 @@ public class Board {
     public int getNumberAt(int x, int y) {
         final int index = (y - 1) * 9 + (x - 1);
         assert (index >= 0 && index < 81);
-        return mNumbers[index];
+        return mBlocks[index].getNumber();
     }
 
     public void setNumberAt(int x, int y, int number) {
         final int index = (y - 1) * 9 + (x - 1);
         assert (index >= 0 && index < 81);
-        mNumbers[index] = number;
+        mBlocks[index].setNumber(number);
 
         for (Listener listener : mListeners) {
             listener.onNumbersChanged(x, y, number);
