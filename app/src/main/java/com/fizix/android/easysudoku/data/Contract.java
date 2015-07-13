@@ -11,9 +11,10 @@ public class Contract {
         public static final String TABLE_NAME = "boards";
 
         // Columns
-        public static final String COL_BOARD_TYPE = "board_type";
+        public static final String COL_DIFFICULTY = "difficulty";
         public static final String COL_SEL_BLOCK_X = "sel_block_x";
         public static final String COL_SEL_BLOCK_Y = "sel_block_y";
+        public static final String COL_SEL_NUMBER = "sel_number";
 
     }
 

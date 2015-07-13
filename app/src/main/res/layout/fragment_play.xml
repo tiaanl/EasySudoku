@@ -1,0 +1,83 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.fizix.android.easysudoku.ui.PlayFragment">
+
+    <com.fizix.android.easysudoku.views.BoardView
+        android:id="@+id/board"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/background_material_light"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_1"
+            style="@style/NumberButton"
+            app:number="1" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_2"
+            style="@style/NumberButton"
+            app:number="2" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_3"
+            style="@style/NumberButton"
+            app:number="3" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_4"
+            style="@style/NumberButton"
+            app:number="4" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_5"
+            style="@style/NumberButton"
+            app:number="5" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/background_material_light"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_6"
+            style="@style/NumberButton"
+            app:number="6" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_7"
+            style="@style/NumberButton"
+            app:number="7" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_8"
+            style="@style/NumberButton"
+            app:number="8" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_9"
+            style="@style/NumberButton"
+            app:number="9" />
+
+        <com.fizix.android.easysudoku.views.NumberButtonView
+            android:id="@+id/button_0"
+            style="@style/NumberButton"
+            app:number="0" />
+
+    </LinearLayout>
+
+</LinearLayout>

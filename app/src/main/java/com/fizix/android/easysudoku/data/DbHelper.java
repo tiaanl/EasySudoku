@@ -20,16 +20,17 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // Create the table holding the boards.
         final String SQL_CREATE_BOARDS_TABLE = "CREATE TABLE " + Boards.TABLE_NAME + " (" +
-                Boards._ID + " INTEGER PRIMARY_KEY, " +
-                Boards.COL_BOARD_TYPE + " INTEGER NOT NULL UNIQUE, " +
+                Boards._ID + " INTEGER PRIMARY KEY, " +
+                Boards.COL_DIFFICULTY + " INTEGER NOT NULL UNIQUE, " +
                 Boards.COL_SEL_BLOCK_X + " INTEGER NOT NULL, " +
                 Boards.COL_SEL_BLOCK_Y + " INTEGER NOT NULL, " +
-                "UNIQUE(" + Boards.COL_BOARD_TYPE + ") ON CONFLICT REPLACE" +
+                Boards.COL_SEL_NUMBER + " INTEGER NOT NULL, " +
+                "UNIQUE(" + Boards.COL_DIFFICULTY + ") ON CONFLICT REPLACE" +
                 ")";
 
         // Create the table holding the blocks.
         final String SQL_CREATE_BLOCKS_TABLE = "CREATE TABLE " + Blocks.TABLE_NAME + " (" +
-                Blocks._ID + " INTEGER PRIMARY_KEY, " +
+                Blocks._ID + " INTEGER PRIMARY KEY, " +
                 Blocks.COL_BOARD_ID + " INTEGER NOT NULL, " +
                 Blocks.COL_INDEX + " INTEGER NOT NULL, " +
                 Blocks.COL_NUMBER + " INTEGER NOT NULL, " +
@@ -44,6 +45,7 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP_TABLE_IF EXISTS " + Blocks.TABLE_NAME);
+        onCreate(db);
     }
 
 }
